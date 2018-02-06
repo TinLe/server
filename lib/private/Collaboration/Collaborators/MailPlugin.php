@@ -80,6 +80,12 @@ class MailPlugin implements ISearchPlugin {
 		$addressBookContacts = $this->contactsManager->search($search, ['EMAIL', 'FN']);
 		$lowerSearch = strtolower($search);
 		foreach ($addressBookContacts as $contact) {
+			if ($search === '' && isset($contact['isLocalSystemBook'])) {
+				// All local users are already listed via the getUsers()
+				// So no need to include them again, when the search term is empty
+				continue;
+			}
+
 			if (isset($contact['EMAIL'])) {
 				$emailAddresses = $contact['EMAIL'];
 				if (!is_array($emailAddresses)) {
@@ -173,6 +179,8 @@ class MailPlugin implements ISearchPlugin {
 
 		if (!$this->shareeEnumeration) {
 			$result['wide'] = [];
+		} else {
+			$result['wide'] = array_slice($result['wide'], $offset, $limit);
 		}
 
 		if (!$searchResult->hasExactIdMatch($emailType) && filter_var($search, FILTER_VALIDATE_EMAIL)) {
