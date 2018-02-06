@@ -605,6 +605,13 @@ class ShareesAPIController extends OCSController {
 		$addressBookContacts = $this->contactsManager->search($search, ['EMAIL', 'FN']);
 		$lowerSearch = strtolower($search);
 		foreach ($addressBookContacts as $contact) {
+
+			if ($search === '' && isset($contact['isLocalSystemBook'])) {
+				// All local users are already listed via the getUsers()
+				// So no need to include them again, when the search term is empty
+				continue;
+			}
+
 			if (isset($contact['EMAIL'])) {
 				$emailAddresses = $contact['EMAIL'];
 				if (!is_array($emailAddresses)) {
@@ -695,6 +702,9 @@ class ShareesAPIController extends OCSController {
 
 		if (!$this->shareeEnumeration) {
 			$result['results'] = [];
+		} else if (count($result['results']) > $this->limit) {
+			// Limit the number of search results to the given size
+			$result['results'] = array_slice($result['results'], 0, $this->limit);
 		}
 
 		if (!$result['exactIdMatch'] && filter_var($search, FILTER_VALIDATE_EMAIL)) {
