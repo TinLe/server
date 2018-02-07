@@ -842,7 +842,7 @@ services:
         matrix:
           OBJECT_STORE: s3
   dockswift:
-      image: predicsis/dockswift
+      image: icewind1991/dockswift
       environment:
       - INITIALIZE=yes
       - IPADDRESS=dockswift
